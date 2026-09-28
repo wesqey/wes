@@ -1,8 +1,9 @@
 import { getProduct, PRODUCTS } from "@/lib/products";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import ProductPurchase from "./ProductPurchase";
+import ImageViewer from "./ImageViewer";
 import BackButton from "./BackButton";
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = getProduct(slug);
@@ -21,22 +22,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           marginTop: 32,
         }}
       >
-        <div
-          style={{
-            background: "var(--bg-raised)",
-            border: "1px solid var(--line)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            maxHeight: "80vh",
-          }}
-        >
-          <img
-            src={`/images/${product.imageFile}`}
-            alt={product.title}
-            style={{ width: "100%", height: "auto", maxHeight: "80vh", objectFit: "contain", display: "block" }}
-          />
-        </div>
+        <ImageViewer src={`/images/${product.imageFile}`} alt={product.title} />
 
         <div style={{ paddingTop: 8 }}>
           <div className="mono" style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16 }}>
