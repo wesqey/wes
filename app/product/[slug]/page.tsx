@@ -3,13 +3,14 @@ import { notFound } from "next/navigation";
 import ProductPurchase from "./ProductPurchase";
 import ImageViewer from "./ImageViewer";
 import BackButton from "./BackButton";
+import { getAvailableSizes } from "@/lib/print-sizes";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = getProduct(slug);
   if (!product) return notFound();
   const index = PRODUCTS.findIndex((p) => p.slug === product.slug);
-
+  const availableSizes = getAvailableSizes(product.imageFile);
   return (
     <main style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 32px 120px" }}>
       <BackButton />
@@ -34,7 +35,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p style={{ color: "var(--muted)", lineHeight: 1.6, marginBottom: 40, fontSize: 17 }}>
             {product.description}
           </p>
-          <ProductPurchase slug={product.slug} />
+          <ProductPurchase slug={product.slug} availableSizes={availableSizes} />
         </div>
       </div>
     </main>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getProduct, getSize } from "@/lib/products";
+import { getAvailableSizes } from "@/lib/print-sizes";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -11,6 +12,14 @@ export async function POST(req: NextRequest) {
   const sizeInfo = getSize(size);
   if (!product || !sizeInfo) {
     return NextResponse.json({ error: "Invalid product or size" }, { status: 400 });
+  }
+
+  const allowedSizes = getAvailableSizes(product.imageFile);
+  if (!allowedSizes.some((s) => s.key === sizeInfo.key)) {
+    return NextResponse.json(
+      { error: "This size isn't available for this print" },
+      { status: 400 }
+    );
   }
 
   const session = await stripe.checkout.sessions.create({

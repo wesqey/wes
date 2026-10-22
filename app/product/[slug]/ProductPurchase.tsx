@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { SIZES } from "@/lib/products";
+import { SIZES, type SizeKey } from "@/lib/products";
 
-export default function ProductPurchase({ slug }: { slug: string }) {
-  const [size, setSize] = useState(SIZES[1].key);
+export default function ProductPurchase({
+  slug,
+  availableSizes,
+}: {
+  slug: string;
+  availableSizes: typeof SIZES;
+}) {
+  const [size, setSize] = useState<SizeKey>(availableSizes[0]?.key ?? SIZES[0].key);
   const [loading, setLoading] = useState(false);
 
   async function handleBuy() {
@@ -23,15 +29,16 @@ export default function ProductPurchase({ slug }: { slug: string }) {
     }
   }
 
-  const selected = SIZES.find((s) => s.key === size)!;
+  const selected = availableSizes.find((s) => s.key === size) ?? availableSizes[0];
+  const hiddenCount = SIZES.length - availableSizes.length;
 
   return (
     <div>
       <div className="mono" style={{ fontSize: 11, color: "var(--muted)", marginBottom: 10 }}>
         SIZE
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-        {SIZES.map((s) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+        {availableSizes.map((s) => (
           <label
             key={s.key}
             className="mono"
@@ -51,7 +58,7 @@ export default function ProductPurchase({ slug }: { slug: string }) {
                 name="size"
                 value={s.key}
                 checked={size === s.key}
-                onChange={() => setSize(s.key)}
+                onChange={() => setSize(s.key as SizeKey)}
                 style={{ accentColor: "var(--accent)" }}
               />
               {s.label}
@@ -60,9 +67,16 @@ export default function ProductPurchase({ slug }: { slug: string }) {
           </label>
         ))}
       </div>
+
+      {hiddenCount > 0 && (
+        <p className="mono" style={{ fontSize: 11, color: "var(--muted)", marginBottom: 20, lineHeight: 1.5 }}>
+          Larger sizes aren't offered for this image at full print quality.
+        </p>
+      )}
+
       <button
         onClick={handleBuy}
-        disabled={loading}
+        disabled={loading || !selected}
         className="mono"
         style={{
           width: "100%",
@@ -73,9 +87,10 @@ export default function ProductPurchase({ slug }: { slug: string }) {
           color: "var(--bg)",
           border: "none",
           cursor: "pointer",
+          marginTop: hiddenCount > 0 ? 0 : 20,
         }}
       >
-        {loading ? "REDIRECTING…" : `ORDER — $${(selected.priceCents / 100).toFixed(2)}`}
+        {loading ? "REDIRECTING…" : `ORDER — $${((selected?.priceCents ?? 0) / 100).toFixed(2)}`}
       </button>
     </div>
   );
